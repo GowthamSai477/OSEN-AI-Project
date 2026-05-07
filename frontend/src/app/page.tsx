@@ -1,12 +1,15 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, useSpring, useMotionValue } from "framer-motion";
 import { SignInButton, useUser } from "@clerk/nextjs";
-import { Brain, RefreshCw, MessageSquareText, Target, BarChart3, ShieldCheck, Play } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Brain, RefreshCw, MessageSquareText, Target, BarChart3, ShieldCheck, Play, Sun, Moon, ArrowRight, CheckCircle2 } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 
-// Animation utility for scroll reveals
+// ──────────────────────────────────────────────────────────────────────────────
+// COMPONENTS & UTILS
+// ──────────────────────────────────────────────────────────────────────────────
+
 const FadeInWhenVisible = ({ children, delay = 0, className = "" }: any) => {
   return (
     <motion.div
@@ -20,6 +23,44 @@ const FadeInWhenVisible = ({ children, delay = 0, className = "" }: any) => {
     </motion.div>
   );
 };
+
+const CursorOrb = ({ isDark }: { isDark: boolean }) => {
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const springConfig = { damping: 30, stiffness: 200 };
+  const sx = useSpring(mouseX, springConfig);
+  const sy = useSpring(mouseY, springConfig);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseX.set(e.clientX);
+      mouseY.set(e.clientY);
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, [mouseX, mouseY]);
+
+  return (
+    <motion.div
+      style={{
+        left: sx,
+        top: sy,
+        x: "-50%",
+        y: "-50%",
+      }}
+      className={`fixed pointer-events-none z-[1] w-[600px] h-[600px] rounded-full blur-[100px] opacity-30 transition-colors duration-1000 ${
+        isDark 
+          ? "bg-[radial-gradient(circle,rgba(124,111,247,0.3)_0%,transparent_70%)]" 
+          : "bg-[radial-gradient(circle,rgba(124,111,247,0.15)_0%,transparent_70%)]"
+      }`}
+    />
+  );
+};
+
+// ──────────────────────────────────────────────────────────────────────────────
+// MAIN PAGE
+// ──────────────────────────────────────────────────────────────────────────────
 
 export default function LandingPage() {
   const { isLoaded, isSignedIn } = useUser();
@@ -35,13 +76,15 @@ export default function LandingPage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+  const handleNavClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     e.preventDefault();
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: "smooth" });
     }
-  };
+  }, []);
+
+  const toggleTheme = () => setIsDark(!isDark);
 
   const tabs = [
     { name: "Chat Assistant", description: "Talk to Planora like a human. Ask it to schedule tasks, get diet plans, or review your week." },
@@ -51,425 +94,307 @@ export default function LandingPage() {
     { name: "Goal Setup", description: "From goal to 7-day plan in under 2 minutes through the AI interview process." }
   ];
 
+  // Theme Variables
+  const theme = {
+    bg: isDark ? "bg-[#080B14]" : "bg-[#F8FAFC]",
+    text: isDark ? "text-[#F0F4FF]" : "text-[#1E293B]",
+    textMuted: isDark ? "text-[#8B95A1]" : "text-[#64748B]",
+    border: isDark ? "border-white/10" : "border-slate-200",
+    navBg: isDark ? "bg-[#080B14]/80" : "bg-white/80",
+    cardBg: isDark ? "bg-[#0D1117]" : "bg-white",
+    btnSecondary: isDark ? "bg-white/5 border-white/20 text-white" : "bg-slate-100 border-slate-200 text-slate-900",
+  };
+
   return (
-    <div className="bg-[#080B14] min-h-screen text-[#F0F4FF] selection:bg-[#7C6FF7]/30">
+    <div className={`${theme.bg} ${theme.text} min-h-screen selection:bg-[#7C6FF7]/30 transition-colors duration-700 font-outfit overflow-x-hidden`}>
       
-      {/* PART 1 — NAVBAR */}
+      {/* Background Interactivity */}
+      <CursorOrb isDark={isDark} />
+      <div className={`fixed inset-0 pointer-events-none opacity-[0.03] transition-opacity ${isDark ? 'block' : 'hidden'}`} style={{ backgroundImage: "url('https://www.transparenttextures.com/patterns/stardust.png')" }} />
+
+      {/* NAVBAR */}
       <nav 
-        className={`fixed top-0 left-0 right-0 h-16 z-50 flex items-center justify-between px-6 transition-all duration-300 ${
+        className={`fixed top-0 left-0 right-0 h-20 z-50 flex items-center justify-between px-8 transition-all duration-500 ${
           isScrolled 
-            ? "bg-[#080B14]/85 backdrop-blur-[12px] border-b border-white/5 shadow-[0_4px_30px_rgba(0,0,0,0.5)]" 
-            : "bg-transparent border-b border-transparent"
+            ? `${theme.navBg} backdrop-blur-xl border-b ${theme.border} shadow-lg` 
+            : "bg-transparent"
         }`}
       >
         <div className="flex items-center gap-2">
-          <span className="text-xl">⚡</span>
-          <span className="font-bold text-[20px] tracking-tight">Planora</span>
+          <div className="w-10 h-10 bg-gradient-to-br from-[#7C6FF7] to-[#3B82F6] rounded-xl flex items-center justify-center shadow-lg shadow-[#7C6FF7]/20">
+            <span className="text-white font-bold text-xl">P</span>
+          </div>
+          <span className={`font-bold text-2xl tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>Planora</span>
         </div>
 
-        <div className="hidden md:flex items-center gap-8 text-[14px] text-[#8B95A1]">
-          {["how-it-works", "features", "demo", "contact"].map((id) => (
+        <div className={`hidden lg:flex items-center gap-10 text-[15px] font-medium ${theme.textMuted}`}>
+          {["how-it-works", "features", "demo"].map((id) => (
             <a 
               key={id} 
               href={`#${id}`} 
               onClick={(e) => handleNavClick(e, id)}
-              className="hover:text-white transition-colors capitalize"
+              className="hover:text-[#7C6FF7] transition-colors capitalize relative group"
             >
               {id.replace(/-/g, ' ')}
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#7C6FF7] transition-all group-hover:w-full" />
             </a>
           ))}
         </div>
 
-        <div className="flex items-center gap-4">
-          {!isLoaded ? (
-            <div className="w-24 h-8 bg-white/5 animate-pulse rounded-full" />
-          ) : !isSignedIn ? (
-            <>
-              <SignInButton mode="modal" forceRedirectUrl="/dashboard">
-                <button className="hidden sm:block text-[14px] text-white hover:text-white/80 transition-colors bg-transparent border border-white/20 rounded-full px-5 py-2 hover:border-white/40">
-                  Sign In
+        <div className="flex items-center gap-6">
+          <button 
+            onClick={toggleTheme}
+            className={`p-2.5 rounded-xl border ${theme.border} ${theme.cardBg} transition-all hover:scale-110 active:scale-95`}
+          >
+            {isDark ? <Sun className="w-5 h-5 text-amber-400" /> : <Moon className="w-5 h-5 text-slate-600" />}
+          </button>
+
+          <div className="flex items-center gap-3">
+            {!isLoaded ? (
+              <div className="w-24 h-10 bg-slate-200/20 animate-pulse rounded-xl" />
+            ) : !isSignedIn ? (
+              <>
+                <SignInButton mode="modal" forceRedirectUrl="/dashboard">
+                  <button className={`hidden sm:block text-[14px] font-semibold ${theme.text} hover:opacity-80 transition-opacity`}>
+                    Log in
+                  </button>
+                </SignInButton>
+                <SignInButton mode="modal" forceRedirectUrl="/dashboard">
+                  <button className="bg-[#7C6FF7] text-white text-[14px] font-bold px-6 py-2.5 rounded-xl hover:bg-[#6B5FE6] transition-all hover:shadow-lg hover:shadow-[#7C6FF7]/30">
+                    Get Started
+                  </button>
+                </SignInButton>
+              </>
+            ) : (
+              <Link href="/dashboard">
+                <button className="bg-[#7C6FF7] text-white text-[14px] font-bold px-6 py-2.5 rounded-xl hover:bg-[#6B5FE6] transition-all hover:shadow-lg hover:shadow-[#7C6FF7]/30">
+                  Dashboard →
                 </button>
-              </SignInButton>
-              <SignInButton mode="modal" forceRedirectUrl="/dashboard">
-                <button className="bg-[#7C6FF7] text-white text-[14px] font-medium px-5 py-2 rounded-full hover:bg-[#6B5FE6] transition-colors">
-                  Start Free →
-                </button>
-              </SignInButton>
-            </>
-          ) : (
-            <Link href="/dashboard">
-              <button className="bg-[#7C6FF7] text-white text-[14px] font-medium px-5 py-2 rounded-full hover:bg-[#6B5FE6] transition-colors">
-                Go to Dashboard →
-              </button>
-            </Link>
-          )}
+              </Link>
+            )}
+          </div>
         </div>
       </nav>
 
-      {/* PART 2 — HERO */}
-      <section className="relative w-full h-screen flex flex-col items-center justify-center text-center overflow-hidden">
-        {/* Background Effects */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(124,111,247,0.15)_0%,transparent_70%)] pointer-events-none" />
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-[0.02] pointer-events-none" />
-        
-        {/* Orbs */}
-        <div className="absolute top-0 left-0 w-[384px] h-[384px] bg-[#7C6FF7] rounded-full blur-[120px] opacity-15 pointer-events-none -translate-x-1/2 -translate-y-1/2" />
-        <div className="absolute bottom-0 right-0 w-[384px] h-[384px] bg-[#3B82F6] rounded-full blur-[120px] opacity-15 pointer-events-none translate-x-1/2 translate-y-1/2" />
+      {/* HERO SECTION */}
+      <section className="relative w-full min-h-screen pt-20 flex flex-col items-center justify-center text-center px-6 overflow-hidden">
+        {/* Animated Orbs */}
+        <div className={`absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-[#7C6FF7] rounded-full blur-[140px] opacity-10 animate-pulse`} />
+        <div className={`absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-[#3B82F6] rounded-full blur-[140px] opacity-10 animate-pulse`} />
 
-        <div className="relative z-10 flex flex-col items-center px-6">
+        <div className="relative z-10 flex flex-col items-center max-w-5xl mx-auto">
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#7C6FF7]/30 bg-[#7C6FF7]/10 text-[#7C6FF7] text-[14px] mb-[32px]"
+            className={`flex items-center gap-2 px-5 py-2 rounded-full border border-[#7C6FF7]/30 bg-[#7C6FF7]/5 text-[#7C6FF7] text-sm font-semibold mb-8`}
           >
-            <span className="animate-pulse">●</span>
-            AI-Powered Life Execution System
+            <span className="flex h-2 w-2 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#7C6FF7] opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#7C6FF7]"></span>
+            </span>
+            Next-Gen AI Life Execution System
           </motion.div>
 
           <motion.h1 
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-[48px] md:text-[72px] font-bold leading-[1.1] tracking-tight"
+            className={`text-5xl md:text-8xl font-black leading-[1.05] tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}
           >
-            <span className="text-white block">Adaptive Planning,</span>
-            <span className="bg-gradient-to-r from-[#7C6FF7] to-[#3B82F6] text-transparent bg-clip-text block pb-2">
-              Powered by AI
+            Don't just plan. <br />
+            <span className="bg-gradient-to-r from-[#7C6FF7] via-[#9489f9] to-[#3B82F6] text-transparent bg-clip-text">
+              Execute with AI.
             </span>
           </motion.h1>
 
           <motion.p 
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="text-[#8B95A1] text-[18px] leading-[1.7] max-w-[600px] mt-[24px]"
+            className={`${theme.textMuted} text-xl md:text-2xl leading-relaxed max-w-3xl mt-10 font-medium`}
           >
-            Most people have goals. Very few achieve them.
-            Planora learns your schedule, builds realistic execution plans,
-            and adapts automatically when life gets in the way.
+            The first planning platform that doesn't just list tasks—it learns your life, builds your roadmap, and adapts automatically when things change.
           </motion.p>
 
           <motion.div 
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="flex flex-col sm:flex-row items-center gap-[16px] mt-[40px]"
+            className="flex flex-col sm:flex-row items-center gap-6 mt-14"
           >
             {!isLoaded ? (
-              <div className="w-48 h-12 bg-white/5 animate-pulse rounded-full" />
+              <div className="w-56 h-14 bg-slate-200/20 animate-pulse rounded-2xl" />
             ) : !isSignedIn ? (
               <SignInButton mode="modal" forceRedirectUrl="/dashboard">
-                <button className="bg-[#7C6FF7] text-white px-[32px] py-[12px] rounded-full font-medium hover:bg-[#6B5FE6] hover:scale-[1.02] transition-all">
-                  Start Planning Free →
+                <button className="bg-[#7C6FF7] text-white px-10 py-4 rounded-2xl font-bold text-lg hover:bg-[#6B5FE6] hover:scale-105 transition-all shadow-xl shadow-[#7C6FF7]/30 group">
+                  Start Your Journey <ArrowRight className="inline ml-2 group-hover:translate-x-1 transition-transform" />
                 </button>
               </SignInButton>
             ) : (
               <Link href="/dashboard">
-                <button className="bg-[#7C6FF7] text-white px-[32px] py-[12px] rounded-full font-medium hover:bg-[#6B5FE6] hover:scale-[1.02] transition-all">
-                  Go to Dashboard →
+                <button className="bg-[#7C6FF7] text-white px-10 py-4 rounded-2xl font-bold text-lg hover:bg-[#6B5FE6] hover:scale-105 transition-all shadow-xl shadow-[#7C6FF7]/30 group">
+                  Open Dashboard <ArrowRight className="inline ml-2 group-hover:translate-x-1 transition-transform" />
                 </button>
               </Link>
             )}
             <a 
               href="#how-it-works"
               onClick={(e) => handleNavClick(e, "how-it-works")}
-              className="px-[32px] py-[12px] rounded-full border border-white/20 text-white/70 hover:text-white hover:border-white transition-all font-medium"
+              className={`px-10 py-4 rounded-2xl border ${theme.border} ${theme.cardBg} font-bold text-lg hover:scale-105 transition-all`}
             >
-              See how it works
+              How it works
             </a>
           </motion.div>
 
           <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7 }}
-            className="mt-[48px] flex items-center justify-center gap-4 text-[#4A5568] text-[13px] font-medium tracking-wide flex-wrap"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8 }}
+            className={`mt-16 flex items-center justify-center gap-8 ${theme.textMuted} text-sm font-bold tracking-widest uppercase`}
           >
-            <span>10,000+ Goals Tracked</span>
-            <span className="hidden sm:inline">|</span>
-            <span>95% Plan Completion</span>
-            <span className="hidden sm:inline">|</span>
-            <span>7-Day AI Plans</span>
+            <span>10k+ Goals</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#7C6FF7]" />
+            <span>95% Success</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#3B82F6]" />
+            <span>AI Driven</span>
           </motion.div>
         </div>
-
-        <motion.div 
-          animate={{ y: [0, 8, 0] }}
-          transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-          className="absolute bottom-[32px] left-1/2 -translate-x-1/2 text-white/30 text-[12px]"
-        >
-          ↓ Scroll to explore
-        </motion.div>
       </section>
 
-      {/* PART 3 — WHAT IS PLANORA */}
-      <section id="how-it-works" className="py-[96px] md:py-[128px] max-w-[1280px] mx-auto px-[24px]">
-        <FadeInWhenVisible className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          
-          <div>
-            <p className="text-[#7C6FF7] text-[12px] uppercase tracking-[0.1em] font-semibold mb-4">ABOUT PLANORA</p>
-            <h2 className="text-white text-[28px] md:text-[36px] font-bold leading-tight mb-8">
-              Your Goals Deserve More Than a To-Do List
+      {/* INTERACTIVE DEMO / FEATURES */}
+      <section id="how-it-works" className="py-32 max-w-7xl mx-auto px-6">
+        <div className="grid lg:grid-cols-2 gap-20 items-center">
+          <FadeInWhenVisible>
+            <span className="text-[#7C6FF7] font-black text-sm tracking-widest uppercase">The Planora Method</span>
+            <h2 className={`text-4xl md:text-5xl font-black mt-4 mb-8 leading-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              Beyond Simple To-Do Lists.
             </h2>
-            <div className="space-y-6 text-[#8B95A1] text-[16px] leading-[1.7]">
+            <div className={`space-y-8 ${theme.textMuted} text-lg leading-relaxed`}>
               <p>
-                Most productivity apps are just digital notepads. You write your goals down, and then nothing happens. Planora is different — it is an AI agent that actively manages your schedule.
+                Standard apps are static. Planora is dynamic. It conducts a short intake interview to understand your life: work, sleep, rest, and habits.
               </p>
-              <p>
-                Tell Planora your goal — lose weight, learn a skill, prepare for exams — and it conducts a short interview to understand your daily life: when you wake up, when you work, what your limits are.
-              </p>
-              <p>
-                From that conversation, it generates a complete 7-day action plan and keeps it updated. Miss a workout? Planora rebalances your week. Ask it to add something? It schedules it intelligently.
-              </p>
-            </div>
-            
-            <div className="mt-8 space-y-3">
-              {[
-                "Personalised to your actual schedule",
-                "Adapts when life disrupts your plan",
-                "Works across fitness, study, diet, and career"
-              ].map((item, i) => (
-                <div key={i} className="flex items-center gap-3 text-white text-[15px]">
-                  <span className="text-[#7C6FF7] font-bold">✓</span> {item}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-[#0D1117] border border-[#1C2333] rounded-[16px] p-[24px] shadow-2xl relative overflow-hidden">
-            <div className="flex items-center gap-2 border-b border-[#1C2333] pb-4 mb-6">
-              <div className="flex gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-[#ef4444]" />
-                <div className="w-3 h-3 rounded-full bg-[#eab308]" />
-                <div className="w-3 h-3 rounded-full bg-[#22c55e]" />
-              </div>
-              <div className="flex-1 text-center text-[13px] text-[#8B95A1] font-medium mr-12">
-                Planora Agent
+              <div className="space-y-4">
+                {[
+                  { title: "Intake Interview", desc: "AI understands your constraints before planning." },
+                  { title: "Dynamic Redistribution", desc: "Missed tasks are intelligently moved to future days." },
+                  { title: "Holistic Sync", desc: "Syncs fitness, study, and career goals into one flow." }
+                ].map((item, i) => (
+                  <div key={i} className="flex gap-4 p-4 rounded-2xl hover:bg-[#7C6FF7]/5 border border-transparent hover:border-[#7C6FF7]/10 transition-all">
+                    <div className="w-12 h-12 bg-[#7C6FF7]/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <CheckCircle2 className="text-[#7C6FF7]" />
+                    </div>
+                    <div>
+                      <h4 className={`font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{item.title}</h4>
+                      <p className="text-sm">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
+          </FadeInWhenVisible>
 
-            <div className="space-y-4">
-              <ChatBubble role="ai" text="What time do you usually wake up?" delay={0.2} />
-              <ChatBubble role="user" text="Around 7am" delay={0.8} />
-              <ChatBubble role="ai" text="What are your work hours?" delay={1.4} />
-              <ChatBubble role="user" text="9am to 5pm, Monday to Friday" delay={2.0} />
-              <ChatBubble role="ai" text="Perfect. Building your plan..." delay={2.6} />
-              
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: 3.6 }}
-                className="bg-[#10B981]/15 text-[#10B981] p-[14px] rounded-[12px] text-[14px] w-full flex items-center gap-2"
-              >
-                <span>✅</span> 7-day plan created — 24 tasks scheduled
-              </motion.div>
-            </div>
+          <div className={`${theme.cardBg} border ${theme.border} rounded-3xl p-8 shadow-2xl relative overflow-hidden group`}>
+             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#7C6FF7] to-[#3B82F6]" />
+             <div className="flex items-center gap-3 mb-10">
+               <div className="flex gap-2">
+                 <div className="w-3 h-3 rounded-full bg-red-400" />
+                 <div className="w-3 h-3 rounded-full bg-amber-400" />
+                 <div className="w-3 h-3 rounded-full bg-emerald-400" />
+               </div>
+               <div className={`text-xs font-bold ${theme.textMuted} uppercase tracking-widest`}>Intelligence Core v2.0</div>
+             </div>
+
+             <div className="space-y-6">
+                <ChatBubble role="ai" text="Welcome back! What's your focus for today?" delay={0.2} isDark={isDark} />
+                <ChatBubble role="user" text="I need to master React.js in 2 weeks while working full-time." delay={1.0} isDark={isDark} />
+                <ChatBubble role="ai" text="Analyzing schedule... I've found 90min blocks in your evenings. Building your roadmap." delay={1.8} isDark={isDark} />
+                
+                <motion.div 
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 2.8 }}
+                  className="bg-emerald-500/10 border border-emerald-500/20 p-5 rounded-2xl"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">✓</div>
+                    <div>
+                      <p className="text-emerald-500 font-bold text-sm tracking-tight">Plan Successfully Generated</p>
+                      <p className={`text-xs ${theme.textMuted}`}>14-day roadmap · 28 focus sessions · Syncing to calendar</p>
+                    </div>
+                  </div>
+                </motion.div>
+             </div>
           </div>
-
-        </FadeInWhenVisible>
+        </div>
       </section>
 
-      {/* PART 4 — UI PREVIEW */}
-      <section id="features" className="py-[96px] md:py-[128px] max-w-[1280px] mx-auto px-[24px]">
-        <FadeInWhenVisible className="text-center mb-12">
-          <p className="text-[#7C6FF7] text-[12px] uppercase tracking-[0.1em] font-semibold mb-4">THE INTERFACE</p>
-          <h2 className="text-white text-[32px] md:text-[40px] font-bold mb-4">
-            Built for clarity. Designed for speed.
-          </h2>
-          <p className="text-[#8B95A1] text-[16px] max-w-[500px] mx-auto">
-            Every screen in Planora is designed to get out of your way and let you focus on execution.
-          </p>
-        </FadeInWhenVisible>
-
-        <FadeInWhenVisible className="flex justify-center mb-12">
-          <div className="bg-[#1C2333] p-[4px] rounded-full flex">
-            <button 
-              onClick={() => setIsDark(true)}
-              className={`flex items-center gap-2 px-[20px] py-[6px] rounded-full transition-all duration-200 ${isDark ? 'bg-[#7C6FF7] text-white' : 'text-[#8B95A1]'}`}
-            >
-              🌙 Dark
-            </button>
-            <button 
-              onClick={() => setIsDark(false)}
-              className={`flex items-center gap-2 px-[20px] py-[6px] rounded-full transition-all duration-200 ${!isDark ? 'bg-[#7C6FF7] text-white' : 'text-[#8B95A1]'}`}
-            >
-              ☀️ Light
-            </button>
-          </div>
-        </FadeInWhenVisible>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <FadeInWhenVisible delay={0.1}>
-            <div className="text-center text-[#8B95A1] text-[12px] mb-3">Dashboard</div>
-            <div className={`rounded-[16px] overflow-hidden border border-white/10 shadow-[0_0_60px_rgba(124,111,247,0.12)] aspect-video flex flex-col items-center justify-center transition-colors duration-500 ${isDark ? 'bg-gradient-to-br from-[#0D1117] to-[#1C2333]' : 'bg-gradient-to-br from-[#e2e8f0] to-[#cbd5e1]'}`}>
-              {/* TODO: Replace placeholder divs with actual <img> or <Image> tags once screenshots are ready */}
-              {/* Dark mode: /screenshots/dashboard-dark.png and /screenshots/assistant-dark.png */}
-              {/* Light mode: /screenshots/dashboard-light.png and /screenshots/assistant-light.png */}
-              <p className={isDark ? "text-[#8B95A1]" : "text-[#475569]"}>Dashboard Screenshot</p>
-              <p className={`text-[12px] mt-2 ${isDark ? "text-[#4A5568]" : "text-[#64748b]"}`}>(replace with actual screenshot)</p>
-            </div>
-          </FadeInWhenVisible>
-
-          <FadeInWhenVisible delay={0.2}>
-            <div className="text-center text-[#8B95A1] text-[12px] mb-3">AI Assistant</div>
-            <div className={`rounded-[16px] overflow-hidden border border-white/10 shadow-[0_0_60px_rgba(124,111,247,0.12)] aspect-video flex flex-col items-center justify-center transition-colors duration-500 ${isDark ? 'bg-gradient-to-br from-[#0D1117] to-[#1C2333]' : 'bg-gradient-to-br from-[#e2e8f0] to-[#cbd5e1]'}`}>
-              <p className={isDark ? "text-[#8B95A1]" : "text-[#475569]"}>AI Assistant Screenshot</p>
-              <p className={`text-[12px] mt-2 ${isDark ? "text-[#4A5568]" : "text-[#64748b]"}`}>(replace with actual screenshot)</p>
-            </div>
-          </FadeInWhenVisible>
+      {/* FEATURES GRID */}
+      <section id="features" className="py-32 max-w-7xl mx-auto px-6">
+        <div className="text-center max-w-3xl mx-auto mb-20">
+          <span className="text-[#7C6FF7] font-black text-sm tracking-widest uppercase">Powerful Modules</span>
+          <h2 className={`text-4xl md:text-5xl font-black mt-4 mb-6 ${isDark ? 'text-white' : 'text-slate-900'}`}>Engineered for Performance.</h2>
+          <p className={`${theme.textMuted} text-lg`}>Everything you need to turn vague intentions into undeniable results.</p>
         </div>
 
-        <FadeInWhenVisible className="flex flex-wrap justify-center gap-4 mt-[40px]">
-          {["📅 Calendar View", "🤖 AI Chat", "📊 Progress Tracking"].map(tag => (
-            <div key={tag} className="border border-[#1C2333] bg-[#0D1117] rounded-full px-[20px] py-[8px] text-[#8B95A1] text-[14px]">
-              {tag}
-            </div>
-          ))}
-        </FadeInWhenVisible>
-      </section>
-
-      {/* PART 5 — HOW IT HELPS */}
-      <section className="py-[96px] md:py-[128px] max-w-[1280px] mx-auto px-[24px]">
-        <FadeInWhenVisible className="text-center mb-16">
-          <p className="text-[#7C6FF7] text-[12px] uppercase tracking-[0.1em] font-semibold mb-4">WHY PLANORA</p>
-          <h2 className="text-white text-[32px] md:text-[40px] font-bold">
-            Stop managing tasks. Start achieving goals.
-          </h2>
-        </FadeInWhenVisible>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           <FeatureCard 
-            icon={<Brain />}
-            title="AI That Knows You"
-            desc="Planora learns your schedule through a 5-question interview before building a single task. No generic templates."
+            icon={<Brain className="w-7 h-7" />}
+            title="Cognitive Interview"
+            desc="Planora's AI identifies your psychological roadblocks and schedule gaps before drafting your plan."
             delay={0.1}
+            isDark={isDark}
           />
           <FeatureCard 
-            icon={<RefreshCw />}
-            title="Auto-Rebalancing"
-            desc="Missed a workout? Planora detects the skip and redistributes your missed work across upcoming days automatically."
+            icon={<RefreshCw className="w-7 h-7" />}
+            title="Active Rebalancing"
+            desc="If life disrupts a task, Planora automatically redistributes the workload to keep you on track."
             delay={0.2}
+            isDark={isDark}
           />
           <FeatureCard 
-            icon={<MessageSquareText />}
-            title="Talk Like a Human"
-            desc="'Add gym 3 times this week' — Planora understands natural language and schedules it with the right times."
+            icon={<BarChart3 className="w-7 h-7" />}
+            title="Efficiency Analysis"
+            desc="Get weekly intelligence reports on your execution speed and focus patterns."
             delay={0.3}
-          />
-          <FeatureCard 
-            icon={<Target />}
-            title="Goal-Driven Planning"
-            desc="Every task connects back to your goal. Planora tracks whether your schedule is actually moving you forward."
-            delay={0.4}
-          />
-          <FeatureCard 
-            icon={<BarChart3 />}
-            title="Weekly Intelligence Reports"
-            desc="Every week, Planora analyses your completion patterns and tells you exactly what to improve next week."
-            delay={0.5}
-          />
-          <FeatureCard 
-            icon={<ShieldCheck />}
-            title="Schedule Guard"
-            desc="Planora never schedules tasks during your sleep hours, work hours, or over locked commitments."
-            delay={0.6}
+            isDark={isDark}
           />
         </div>
       </section>
 
-      {/* PART 6 — DEMO SECTION */}
-      <section id="demo" className="py-[96px] md:py-[128px] max-w-[1280px] mx-auto px-[24px]">
-        <FadeInWhenVisible className="text-center mb-12">
-          <p className="text-[#7C6FF7] text-[12px] uppercase tracking-[0.1em] font-semibold mb-4">SEE IT IN ACTION</p>
-          <h2 className="text-white text-[32px] md:text-[40px] font-bold mb-4">
-            Watch Planora Build Your Life Plan
-          </h2>
-          <p className="text-[#8B95A1] text-[16px]">
-            Click any feature below to see exactly how it works.
+      {/* CTA SECTION */}
+      <section className="py-32 px-6">
+        <div className="max-w-5xl mx-auto bg-gradient-to-br from-[#7C6FF7] to-[#3B82F6] rounded-[40px] p-12 md:p-20 text-center relative overflow-hidden shadow-2xl shadow-[#7C6FF7]/20">
+          <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10 pointer-events-none" />
+          <h2 className="text-4xl md:text-6xl font-black text-white mb-8 relative z-10">Ready to execute?</h2>
+          <p className="text-white/80 text-xl md:text-2xl font-medium mb-12 relative z-10 max-w-2xl mx-auto">
+            Join thousands of others who are achieving their goals with the power of Planora AI.
           </p>
-        </FadeInWhenVisible>
-
-        <FadeInWhenVisible className="flex flex-wrap justify-center gap-[8px] mb-[32px]">
-          {tabs.map((tab, idx) => (
-            <button
-              key={idx}
-              onClick={() => setActiveTab(idx)}
-              className={`px-[20px] py-[10px] rounded-full text-[14px] transition-all duration-200 ${
-                activeTab === idx 
-                  ? 'bg-[#7C6FF7] text-white' 
-                  : 'bg-transparent text-[#8B95A1] border border-[#1C2333] hover:text-white hover:border-white/20'
-              }`}
-            >
-              {tab.name}
-            </button>
-          ))}
-        </FadeInWhenVisible>
-
-        <FadeInWhenVisible className="max-w-[768px] mx-auto border border-[#1C2333] bg-[#0D1117] rounded-[16px] overflow-hidden aspect-video flex flex-col items-center justify-center relative">
-          {/* TODO: Replace placeholder divs with actual <video> tags */}
-          {/* Video files: /videos/chat-demo.mp4, /videos/planner-demo.mp4, etc. */}
-          {/* Use autoPlay muted loop playsInline attributes */}
-          <div className="w-[64px] h-[64px] rounded-full border-2 border-[#7C6FF7] flex items-center justify-center mb-6">
-            <Play className="w-8 h-8 text-[#7C6FF7] ml-1" fill="currentColor" />
+          <div className="relative z-10 flex flex-col sm:flex-row items-center justify-center gap-6">
+            <SignInButton mode="modal" forceRedirectUrl="/dashboard">
+              <button className="bg-white text-[#7C6FF7] px-12 py-5 rounded-2xl font-black text-xl hover:scale-105 transition-all shadow-xl">
+                Get Planora Free
+              </button>
+            </SignInButton>
           </div>
-          <h3 className="text-white text-[24px] font-bold mb-2 transition-opacity duration-300">
-            {tabs[activeTab].name}
-          </h3>
-          <p className="text-[#8B95A1] text-[16px] max-w-[500px] text-center px-6 transition-opacity duration-300">
-            {tabs[activeTab].description}
-          </p>
-        </FadeInWhenVisible>
-        
-        <FadeInWhenVisible className="text-center mt-[16px]">
-          <p className="text-[#4A5568] text-[13px]">No account needed to watch the demos.</p>
-        </FadeInWhenVisible>
+        </div>
       </section>
 
-      {/* PART 7 — FOOTER */}
-      <footer id="contact" className="bg-[#04060D] border-t border-[#1C2333] pt-[64px] pb-[40px] px-[24px]">
-        <div className="max-w-[1280px] mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-[48px] mb-[64px]">
-            
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-xl">⚡</span>
-                <span className="font-bold text-[20px] text-white tracking-tight">Planora</span>
+      {/* FOOTER */}
+      <footer className={`py-20 border-t ${theme.border} bg-opacity-50`}>
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-10">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-[#7C6FF7] to-[#3B82F6] rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">P</span>
               </div>
-              <p className="text-[#8B95A1] text-[14px] mt-[12px]">Turn your goals into daily execution.</p>
-              <p className="text-[#4A5568] text-[13px] mt-[8px]">Built for INT428 — AI Systems Course</p>
-              <p className="text-[#4A5568] text-[13px] mt-[24px]">© 2025 Planora</p>
+              <span className={`font-bold text-xl ${isDark ? 'text-white' : 'text-slate-900'}`}>Planora</span>
             </div>
-
-            <div className="flex flex-col gap-[6px]">
-              <h4 className="text-[#4A5568] text-[11px] font-bold tracking-[0.1em] uppercase mb-[16px]">DEVELOPER</h4>
-              <p className="text-white font-bold text-[16px]">[Your Full Name]</p>
-              <p className="text-[#8B95A1] text-[14px]">Roll No: [Your Roll Number]</p>
-              <p className="text-[#8B95A1] text-[14px]">[Branch] — [Semester]</p>
-              <p className="text-[#8B95A1] text-[14px]">[University Name]</p>
-              <p className="text-[#8B95A1] text-[14px]">Guide: [Faculty Name]</p>
+            <p className={`${theme.textMuted} text-sm font-medium`}>© 2025 Planora AI · Built with Passion</p>
+            <div className="flex gap-8 text-sm font-bold">
+              <a href="#" className={`hover:text-[#7C6FF7] transition-colors ${theme.textMuted}`}>GitHub</a>
+              <a href="#" className={`hover:text-[#7C6FF7] transition-colors ${theme.textMuted}`}>LinkedIn</a>
+              <a href="#" className={`hover:text-[#7C6FF7] transition-colors ${theme.textMuted}`}>Twitter</a>
             </div>
-
-            <div className="flex flex-col gap-[12px]">
-              <h4 className="text-[#4A5568] text-[11px] font-bold tracking-[0.1em] uppercase mb-[4px]">CONNECT</h4>
-              <a href="https://github.com/GowthamSai477/planora-ai" target="_blank" rel="noopener noreferrer" className="flex items-center gap-[8px] text-[#8B95A1] hover:text-white transition-colors duration-200">
-                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
-                GowthamSai477/planora-ai
-              </a>
-              <a href="#" className="flex items-center gap-[8px] text-[#8B95A1] hover:text-white transition-colors duration-200">
-                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
-                linkedin.com/in/[username]
-              </a>
-              <a href="#" className="flex items-center gap-[8px] text-[#8B95A1] hover:text-white transition-colors duration-200">
-                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
-                @[username]
-              </a>
-            </div>
-
-          </div>
-
-          <div className="border-t border-[#1C2333] pt-[32px] text-center">
-            <p className="text-[#4A5568] text-[12px]">Built with ❤️ using Next.js · FastAPI · Groq AI · Supabase</p>
           </div>
         </div>
       </footer>
@@ -477,17 +402,17 @@ export default function LandingPage() {
   );
 }
 
-function ChatBubble({ role, text, delay }: { role: "ai" | "user", text: string, delay: number }) {
+function ChatBubble({ role, text, delay, isDark }: { role: "ai" | "user", text: string, delay: number, isDark: boolean }) {
   return (
     <motion.div 
       initial={{ opacity: 0, y: 10 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ delay }}
-      className={`rounded-[12px] p-[8px_14px] text-[14px] max-w-[85%] ${
+      className={`rounded-2xl px-5 py-3 text-sm font-medium max-w-[85%] shadow-sm ${
         role === "ai" 
-          ? "bg-white/5 text-white mr-auto" 
-          : "bg-[#7C6FF7]/20 text-[#7C6FF7] ml-auto"
+          ? (isDark ? "bg-white/5 text-white border border-white/10 mr-auto" : "bg-slate-100 text-slate-800 border border-slate-200 mr-auto") 
+          : "bg-[#7C6FF7] text-white ml-auto"
       }`}
     >
       {text}
@@ -495,15 +420,15 @@ function ChatBubble({ role, text, delay }: { role: "ai" | "user", text: string, 
   );
 }
 
-function FeatureCard({ icon, title, desc, delay }: { icon: React.ReactNode, title: string, desc: string, delay: number }) {
+function FeatureCard({ icon, title, desc, delay, isDark }: { icon: React.ReactNode, title: string, desc: string, delay: number, isDark: boolean }) {
   return (
     <FadeInWhenVisible delay={delay}>
-      <div className="group bg-[#0D1117] border border-[#1C2333] hover:border-[#7C6FF7]/40 rounded-[16px] p-[24px] transition-all duration-300 h-full">
-        <div className="w-[24px] h-[24px] text-[#7C6FF7] group-hover:text-[#9b8bfa] transition-colors">
+      <div className={`group ${isDark ? 'bg-[#0D1117] border-white/10 hover:bg-white/[0.02]' : 'bg-white border-slate-200 hover:bg-slate-50'} border-2 rounded-[32px] p-10 transition-all duration-300 h-full hover:shadow-2xl hover:-translate-y-2`}>
+        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors ${isDark ? 'bg-white/5 text-[#7C6FF7]' : 'bg-slate-100 text-[#7C6FF7]'}`}>
           {icon}
         </div>
-        <h3 className="text-white font-bold text-[18px] mt-[16px]">{title}</h3>
-        <p className="text-[#8B95A1] text-[14px] leading-[1.6] mt-[8px]">
+        <h3 className={`font-black text-2xl mt-8 ${isDark ? 'text-white' : 'text-slate-900'}`}>{title}</h3>
+        <p className={`mt-4 leading-relaxed font-medium ${isDark ? 'text-[#8B95A1]' : 'text-slate-500'}`}>
           {desc}
         </p>
       </div>
