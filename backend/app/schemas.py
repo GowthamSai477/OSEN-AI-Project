@@ -1,0 +1,125 @@
+from pydantic import BaseModel
+from typing import Optional, List, Dict, Any
+from datetime import datetime
+from uuid import UUID
+
+class HealthResponse(BaseModel):
+    status: str
+    database: str
+
+class ChatRequest(BaseModel):
+    message: str
+    session_id: Optional[str] = None
+    history: List[Dict[str, Any]] = []
+    mode: str = "chat"
+    intelligence_level: str = "Standard"
+    response_style: str = "Concise"
+
+class GoalCreate(BaseModel):
+    title: str
+    target: str
+    duration: str
+    constraints: List[str] = []
+
+class GoalResponse(BaseModel):
+    id: UUID
+    title: str
+    target: str
+    duration: str
+    
+    class Config:
+        from_attributes = True
+
+class GoalStatsResponse(BaseModel):
+    goal: Optional[GoalResponse]
+    completion_percentage: float
+    streak: int
+    interview_status: str
+    
+    class Config:
+        from_attributes = True
+
+class TaskCreate(BaseModel):
+    task: str
+    date: str
+    time: str
+    duration_minutes: int = 30
+    category: str = "personal"
+    task_type: str = "habit"
+    priority: str = "medium"
+    url: Optional[str] = None
+    links: Optional[List[Dict[str, Any]]] = None
+
+class TaskUpdate(BaseModel):
+    task: Optional[str] = None
+    date: Optional[str] = None
+    time: Optional[str] = None
+    duration_minutes: Optional[int] = None
+    category: Optional[str] = None
+    priority: Optional[str] = None
+    completed: Optional[bool] = None
+    url: Optional[str] = None
+    links: Optional[List[Dict[str, Any]]] = None
+
+class SubTaskResponse(BaseModel):
+    id: UUID
+    task_id: UUID
+    title: str
+    duration_minutes: int
+    completed: bool
+    order: int
+    
+    class Config:
+        from_attributes = True
+
+class TaskResponse(BaseModel):
+    id: UUID
+    task: str
+    date: datetime
+    time: str
+    duration_minutes: int
+    category: str
+    task_type: str
+    status: str
+    priority: str
+    completed: bool
+    url: Optional[str] = None
+    links: Optional[List[Dict[str, Any]]] = None
+    subtasks: List[SubTaskResponse] = []
+
+    class Config:
+        from_attributes = True
+
+class ExecuteRequest(BaseModel):
+    action_id: str
+    actions: List[Dict[str, Any]]
+
+class DeleteRangeRequest(BaseModel):
+    startDate: str
+    endDate: str
+    messageId: Optional[str] = None
+
+class ResolveConflictRequest(BaseModel):
+    action: str  # "replace", "find_next_free_slot", or "keep_both"
+    task_data: Dict[str, Any]
+    messageId: Optional[str] = None
+
+class UserPreferencesUpdate(BaseModel):
+    timezone: Optional[str] = None
+    email_notifications_enabled: Optional[bool] = None
+    email_morning_enabled: Optional[bool] = None
+    email_evening_enabled: Optional[bool] = None
+    email_events_enabled: Optional[bool] = None
+    email_plan_changes_enabled: Optional[bool] = None
+    morning_email_time: Optional[str] = None
+    evening_email_time: Optional[str] = None
+
+class UserPreferencesResponse(BaseModel):
+    timezone: str
+    email_notifications_enabled: bool
+    email_morning_enabled: bool
+    email_evening_enabled: bool
+    email_events_enabled: bool
+    email_plan_changes_enabled: bool
+    morning_email_time: str
+    evening_email_time: str

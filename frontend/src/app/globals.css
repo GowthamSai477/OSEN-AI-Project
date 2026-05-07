@@ -1,0 +1,181 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  
+  --color-card: var(--surface);
+  --color-card-border: var(--border);
+  
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  
+  --color-secondary: var(--surface-elevated);
+  --color-secondary-hover: var(--surface-hover);
+
+  --color-accent: var(--accent);
+  --color-accent-glow: var(--accent-glow);
+  
+  --color-muted: var(--text-secondary);
+  
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  /* Light Mode Variables */
+  --background: #f8f8fc;
+  --foreground: #0a0a1a;
+  --surface: #ffffff;
+  --surface-elevated: #f0f0f8;
+  --surface-hover: #e8e8f2;
+  --border: #0000000f;
+  --text-secondary: #666680;
+  
+  --primary: #7c3aed;
+  --primary-hover: #6d28d9;
+  --accent: #7c3aed;
+  --accent-glow: rgba(124, 58, 237, 0.15);
+}
+
+[data-theme="dark"] {
+  /* Dark Mode Variables */
+  --background: #0a0a0f;
+  --foreground: #f0f0ff;
+  --surface: #111118;
+  --surface-elevated: #1a1a24;
+  --surface-hover: #222230;
+  --border: #ffffff0f;
+  --text-secondary: #8888aa;
+  
+  --primary: #7c3aed;
+  --primary-hover: #8b5cf6;
+  --accent: #7c3aed;
+  --accent-glow: rgba(124, 58, 237, 0.3);
+}
+
+/* ─ Marvel Character Themes ────────────────────────────────── */
+/* Layer ON TOP of light/dark — only accent+surface overridden.  */
+
+[data-character="iron-man"] {
+  --accent: #C0392B;
+  --accent-secondary: #E67E22;
+  --accent-glow: rgba(192, 57, 43, 0.4);
+  --surface: #1a0a0a;
+  --surface-elevated: #220d0d;
+  --surface-hover: #2e1010;
+  --border: rgba(192, 57, 43, 0.15);
+  --primary: #C0392B;
+  --primary-hover: #a93226;
+}
+
+[data-character="thor"] {
+  --accent: #1A6EBF;
+  --accent-secondary: #F1C40F;
+  --accent-glow: rgba(26, 110, 191, 0.4);
+  --surface: #0a0f1a;
+  --surface-elevated: #0d1422;
+  --surface-hover: #111c2e;
+  --border: rgba(26, 110, 191, 0.15);
+  --primary: #1A6EBF;
+  --primary-hover: #1a5fa3;
+}
+
+[data-character="loki"] {
+  --accent: #1A7A4A;
+  --accent-secondary: #C9A227;
+  --accent-glow: rgba(26, 122, 74, 0.4);
+  --surface: #0a1a0f;
+  --surface-elevated: #0d221a;
+  --surface-hover: #112b20;
+  --border: rgba(26, 122, 74, 0.15);
+  --primary: #1A7A4A;
+  --primary-hover: #16693f;
+}
+
+[data-character="black-panther"] {
+  --accent: #6C3483;
+  --accent-secondary: #A569BD;
+  --accent-glow: rgba(108, 52, 131, 0.4);
+  --surface: #0d0a1a;
+  --surface-elevated: #120d22;
+  --surface-hover: #1a1230;
+  --border: rgba(108, 52, 131, 0.15);
+  --primary: #6C3483;
+  --primary-hover: #5c2c70;
+}
+
+[data-character="doctor-strange"] {
+  --accent: #E74C3C;
+  --accent-secondary: #F39C12;
+  --accent-glow: rgba(231, 76, 60, 0.4);
+  --surface: #1a0a0d;
+  --surface-elevated: #220d12;
+  --surface-hover: #2e1018;
+  --border: rgba(231, 76, 60, 0.15);
+  --primary: #E74C3C;
+  --primary-hover: #cb4335;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  background-image: 
+    radial-gradient(at 0% 0%, var(--accent-glow) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, var(--accent-glow) 0px, transparent 50%);
+  background-attachment: fixed;
+}
+
+* {
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+@layer utilities {
+  .glass-card {
+    @apply bg-card/80 border border-card-border backdrop-blur-xl rounded-2xl shadow-lg transition-all duration-300;
+  }
+  
+  .glass-card:hover {
+    @apply shadow-xl border-accent/30;
+    transform: translateY(-2px);
+  }
+  
+  .glass-panel {
+    @apply bg-background/90 border border-card-border backdrop-blur-2xl rounded-3xl shadow-2xl transition-all duration-300;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-accent to-purple-400;
+  }
+  
+  .glow-border {
+    @apply border border-accent/40 shadow-[0_0_15px_var(--color-accent-glow)];
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  33% { transform: translateY(-20px) translateX(10px); }
+  66% { transform: translateY(10px) translateX(-15px); }
+}
+
+.animate-float {
+  animation: float 10s ease-in-out infinite;
+}
+
