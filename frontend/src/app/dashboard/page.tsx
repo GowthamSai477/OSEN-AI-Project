@@ -187,10 +187,10 @@ export default function DashboardOverview() {
     <div className="max-w-5xl mx-auto space-y-8">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-xl font-semibold text-gray-800 dark:text-white">
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
             Good {timeOfDay}, {user?.firstName || "User"} 👋
           </h1>
-          <p className="text-sm text-gray-400 mt-0.5">
+          <p className="text-sm text-gray-500 mt-0.5">
             {tasks.length > 0
               ? `${tasks.length} task${tasks.length > 1 ? 's' : ''} scheduled for today`
               : "No tasks today — add some!"}
@@ -203,29 +203,29 @@ export default function DashboardOverview() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Card 1 — Current Goal */}
-        <div className="relative overflow-hidden rounded-2xl p-5 bg-white dark:bg-[#111118] border border-gray-100 dark:border-white/8 shadow-sm hover:shadow-md transition-all duration-200 ease-out hover:-translate-y-0.5 group">
-          <div className="absolute left-0 top-0 bottom-0 w-1 bg-violet-500 rounded-l-2xl"/>
+        <div className="relative overflow-hidden rounded-xl p-4 bg-white dark:bg-[#111118] border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-md transition-all duration-200 ease-out hover:-translate-y-0.5 group">
+          <div className="absolute left-0 top-0 bottom-0 w-1 bg-violet-500 rounded-l-xl"/>
           <div className="flex flex-col h-full">
-            <span className="text-[10px] font-semibold tracking-widest text-violet-400 uppercase mb-1">CURRENT GOAL</span>
-            <p className="text-lg font-bold text-gray-800 dark:text-white truncate">
+            <span className="text-[10px] font-semibold tracking-widest text-gray-400 dark:text-gray-500 uppercase mb-1">CURRENT GOAL</span>
+            <p className="text-lg font-bold text-gray-900 dark:text-white truncate">
               {goalStats?.goal?.title || "No Goal Set"}
             </p>
-            <p className="text-xs text-gray-400 mt-0.5 truncate">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
               {goalStats?.goal?.target || "Talk to AI to set a goal"}
             </p>
           </div>
         </div>
 
         {/* Card 2 — Today's Progress */}
-        <div className="relative overflow-hidden rounded-2xl p-5 bg-white dark:bg-[#111118] border border-gray-100 dark:border-white/8 shadow-sm hover:shadow-md transition-all duration-200 ease-out hover:-translate-y-0.5 group">
-          <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-400 rounded-l-2xl"/>
+        <div className="relative overflow-hidden rounded-xl p-4 bg-white dark:bg-[#111118] border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-md transition-all duration-200 ease-out hover:-translate-y-0.5 group">
+          <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-400 rounded-l-xl"/>
           <div className="flex flex-col h-full">
             <span className="text-[10px] font-semibold tracking-widest text-emerald-400 uppercase mb-1">TODAY</span>
-            <p className="text-lg font-bold text-gray-800 dark:text-white">
+            <p className="text-lg font-bold text-gray-900 dark:text-white">
               {completedCount}/{tasks.length}
               <span className="text-xs font-normal text-gray-400 ml-1.5">tasks</span>
             </p>
-            <div className="w-full bg-gray-100 dark:bg-white/8 rounded-full h-1.5 mt-3">
+            <div className="w-full bg-gray-100 dark:bg-white/10 rounded-full h-1.5 mt-3">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${progressPercent}%` }}
@@ -239,23 +239,23 @@ export default function DashboardOverview() {
         </div>
 
         {/* Card 3 — Active Streak */}
-        <div className="relative overflow-hidden rounded-2xl p-5 bg-white dark:bg-[#111118] border border-gray-100 dark:border-white/8 shadow-sm hover:shadow-md transition-all duration-200 ease-out hover:-translate-y-0.5 group">
-          <div className="absolute left-0 top-0 bottom-0 w-1 bg-orange-400 rounded-l-2xl"/>
+        <div className="relative overflow-hidden rounded-xl p-4 bg-white dark:bg-[#111118] border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-md transition-all duration-200 ease-out hover:-translate-y-0.5 group">
+          <div className="absolute left-0 top-0 bottom-0 w-1 bg-orange-400 rounded-l-xl"/>
           <div className="flex flex-col h-full">
             <span className="text-[10px] font-semibold tracking-widest text-orange-400 uppercase mb-1">STREAK</span>
-            <p className="text-lg font-bold text-gray-800 dark:text-white">
+            <p className="text-lg font-bold text-gray-900 dark:text-white">
               {goalStats?.streak > 0 && "🔥 "}{goalStats?.streak || 0}
               <span className="text-xs font-normal text-gray-400 ml-1.5">days</span>
             </p>
-            <p className="text-xs text-gray-400 mt-0.5">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
               {goalStats?.streak > 0 ? "You're on fire!" : "Start today"}
             </p>
           </div>
         </div>
 
         {/* Card 4 — Weekly Summary */}
-        <div className="relative overflow-hidden rounded-2xl p-5 bg-white dark:bg-[#111118] border border-gray-100 dark:border-white/8 shadow-sm hover:shadow-md transition-all duration-200 ease-out hover:-translate-y-0.5 group">
-          <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-400 rounded-l-2xl"/>
+        <div className="relative overflow-hidden rounded-xl p-4 bg-white dark:bg-[#111118] border border-gray-200 dark:border-white/10 shadow-sm hover:shadow-md transition-all duration-200 ease-out hover:-translate-y-0.5 group">
+          <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-400 rounded-l-xl"/>
           <Link
             href="/dashboard/progress"
             className="text-[11px] text-blue-400 hover:text-blue-500 absolute top-4 right-4 transition-colors font-medium"
@@ -265,7 +265,7 @@ export default function DashboardOverview() {
           <div className="flex flex-col h-full">
             <span className="text-[10px] font-semibold tracking-widest text-blue-400 uppercase mb-1">THIS WEEK</span>
             <div className="flex items-center gap-3">
-              <p className="text-lg font-bold text-gray-800 dark:text-white">
+              <p className="text-lg font-bold text-gray-900 dark:text-white">
                 {weekReport?.completion_rate || 0}%
                 <span className="text-xs font-normal text-gray-400 ml-1.5">done</span>
               </p>
@@ -285,7 +285,7 @@ export default function DashboardOverview() {
                 </span>
               )}
             </div>
-            <p className="text-xs text-gray-400 mt-0.5">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
               Weekly focus overview
             </p>
           </div>
@@ -303,7 +303,7 @@ export default function DashboardOverview() {
 
       <div className="pt-4">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-semibold text-gray-800 dark:text-white">
+          <h2 className="text-base font-semibold text-gray-900 dark:text-white">
             Today's Schedule
           </h2>
           <button suppressHydrationWarning
@@ -383,7 +383,7 @@ function TaskTimelineItem({ id, time, task, category, completed = false, subtask
   const completedSubtasks = subtasks.filter((st: any) => st.completed).length;
 
   return (
-    <div className="flex items-center gap-3 p-4 bg-white dark:bg-[#111118] border border-gray-100 dark:border-white/8 rounded-xl mb-2 shadow-sm hover:border-violet-200 dark:hover:border-violet-500/20 hover:shadow-md transition-all duration-150 group">
+    <div className="flex items-center gap-3 p-4 bg-white dark:bg-[#111118] border border-gray-100 dark:border-white/10 rounded-xl mb-2 shadow-sm hover:border-violet-300 dark:hover:border-violet-500/30 hover:shadow-md transition-all duration-150 group">
       <div
         onClick={onClick}
         className="flex items-center gap-4 cursor-pointer flex-1"
@@ -414,7 +414,7 @@ function TaskTimelineItem({ id, time, task, category, completed = false, subtask
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <p className={`text-sm font-bold truncate ${completed ? 'line-through text-muted' : 'text-gray-800 dark:text-white'}`}>
+            <p className={`text-sm font-bold truncate ${completed ? 'line-through text-muted' : 'text-gray-900 dark:text-white'}`}>
               {task}
             </p>
             {subtasks.length > 0 && (
