@@ -185,90 +185,110 @@ export default function DashboardOverview() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
+      <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">
+          <h1 className="text-xl font-semibold text-gray-800 dark:text-white">
             Good {timeOfDay}, {user?.firstName || "User"} 👋
           </h1>
-          <p className="text-sm text-muted mt-0.5">
+          <p className="text-sm text-gray-400 mt-0.5">
             {tasks.length > 0
               ? `${tasks.length} task${tasks.length > 1 ? 's' : ''} scheduled for today`
-              : "No tasks scheduled for today"}
+              : "No tasks today — add some!"}
           </p>
         </div>
-        <div className="text-sm text-muted font-medium">
+        <p className="text-sm text-gray-400 hidden md:block">
           {todayDate}
-        </div>
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div className="bg-surface border border-card-border rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-[10px] text-muted uppercase font-bold tracking-wider">Current Goal</span>
-          </div>
-          <p className="font-semibold text-sm text-foreground truncate">
-            {goalStats?.goal?.title || "No Goal Set"}
-          </p>
-          <p className="text-[11px] text-muted mt-0.5 truncate">
-            {goalStats?.goal?.target || "Talk to AI to set a goal"}
-          </p>
-        </div>
-
-        <div className="bg-surface border border-card-border rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-[10px] text-muted uppercase font-bold tracking-wider">Today</span>
-          </div>
-          <p className="font-semibold text-foreground text-sm">
-            {completedCount}/{tasks.length}
-            <span className="text-[11px] text-muted ml-1 font-normal">tasks</span>
-          </p>
-          <div className="w-full bg-secondary rounded-full h-1.5 mt-2">
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: `${progressPercent}%` }}
-              className="bg-accent rounded-full h-1.5 transition-all duration-1000"
-            />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Card 1 — Current Goal */}
+        <div className="relative overflow-hidden rounded-2xl p-5 bg-white dark:bg-[#111118] border border-gray-100 dark:border-white/8 shadow-sm hover:shadow-md transition-all duration-200 ease-out hover:-translate-y-0.5 group">
+          <div className="absolute left-0 top-0 bottom-0 w-1 bg-violet-500 rounded-l-2xl"/>
+          <div className="flex flex-col h-full">
+            <span className="text-[10px] font-semibold tracking-widest text-violet-400 uppercase mb-1">CURRENT GOAL</span>
+            <p className="text-lg font-bold text-gray-800 dark:text-white truncate">
+              {goalStats?.goal?.title || "No Goal Set"}
+            </p>
+            <p className="text-xs text-gray-400 mt-0.5 truncate">
+              {goalStats?.goal?.target || "Talk to AI to set a goal"}
+            </p>
           </div>
         </div>
 
-        <div className="bg-surface border border-card-border rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-[10px] text-muted uppercase font-bold tracking-wider">Streak</span>
+        {/* Card 2 — Today's Progress */}
+        <div className="relative overflow-hidden rounded-2xl p-5 bg-white dark:bg-[#111118] border border-gray-100 dark:border-white/8 shadow-sm hover:shadow-md transition-all duration-200 ease-out hover:-translate-y-0.5 group">
+          <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-400 rounded-l-2xl"/>
+          <div className="flex flex-col h-full">
+            <span className="text-[10px] font-semibold tracking-widest text-emerald-400 uppercase mb-1">TODAY</span>
+            <p className="text-lg font-bold text-gray-800 dark:text-white">
+              {completedCount}/{tasks.length}
+              <span className="text-xs font-normal text-gray-400 ml-1.5">tasks</span>
+            </p>
+            <div className="w-full bg-gray-100 dark:bg-white/8 rounded-full h-1.5 mt-3">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${progressPercent}%` }}
+                className="bg-emerald-400 h-1.5 rounded-full transition-all duration-500"
+              />
+            </div>
+            <p className="text-[10px] text-gray-400 mt-1">
+              {Math.round(progressPercent)}% complete
+            </p>
           </div>
-          <p className="font-semibold text-foreground text-sm">
-            🔥 {goalStats?.streak || 0}
-            <span className="text-[11px] text-muted ml-1 font-normal">days</span>
-          </p>
-          <p className="text-[11px] text-muted mt-0.5">
-            {goalStats?.streak > 0 ? "You're on fire!" : "Start today"}
-          </p>
         </div>
 
-        <div className="bg-surface border border-card-border rounded-xl p-4">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-[10px] text-muted uppercase font-bold tracking-wider">This Week</span>
-            <Link
-              href="/dashboard/progress"
-              className="text-[10px] text-accent font-bold hover:underline"
-            >
-              View →
-            </Link>
+        {/* Card 3 — Active Streak */}
+        <div className="relative overflow-hidden rounded-2xl p-5 bg-white dark:bg-[#111118] border border-gray-100 dark:border-white/8 shadow-sm hover:shadow-md transition-all duration-200 ease-out hover:-translate-y-0.5 group">
+          <div className="absolute left-0 top-0 bottom-0 w-1 bg-orange-400 rounded-l-2xl"/>
+          <div className="flex flex-col h-full">
+            <span className="text-[10px] font-semibold tracking-widest text-orange-400 uppercase mb-1">STREAK</span>
+            <p className="text-lg font-bold text-gray-800 dark:text-white">
+              {goalStats?.streak > 0 && "🔥 "}{goalStats?.streak || 0}
+              <span className="text-xs font-normal text-gray-400 ml-1.5">days</span>
+            </p>
+            <p className="text-xs text-gray-400 mt-0.5">
+              {goalStats?.streak > 0 ? "You're on fire!" : "Start today"}
+            </p>
           </div>
-          <p className="font-semibold text-foreground text-sm">
-            {weekReport?.completion_rate || 0}%
-            <span className="text-[11px] text-muted ml-1 font-normal">done</span>
-          </p>
-          <p className="text-[11px] mt-0.5 font-medium">
-            {!weekReport ? (
-              <span className="text-muted">No data</span>
-            ) : weekReport.on_track_status === "on_track" ? (
-              <span className="text-emerald-500">On track ✓</span>
-            ) : weekReport.on_track_status === "at_risk" ? (
-              <span className="text-yellow-500">At risk ⚠</span>
-            ) : (
-              <span className="text-red-400">Behind ✗</span>
-            )}
-          </p>
+        </div>
+
+        {/* Card 4 — Weekly Summary */}
+        <div className="relative overflow-hidden rounded-2xl p-5 bg-white dark:bg-[#111118] border border-gray-100 dark:border-white/8 shadow-sm hover:shadow-md transition-all duration-200 ease-out hover:-translate-y-0.5 group">
+          <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-400 rounded-l-2xl"/>
+          <Link
+            href="/dashboard/progress"
+            className="text-[11px] text-blue-400 hover:text-blue-500 absolute top-4 right-4 transition-colors font-medium"
+          >
+            View →
+          </Link>
+          <div className="flex flex-col h-full">
+            <span className="text-[10px] font-semibold tracking-widest text-blue-400 uppercase mb-1">THIS WEEK</span>
+            <div className="flex items-center gap-3">
+              <p className="text-lg font-bold text-gray-800 dark:text-white">
+                {weekReport?.completion_rate || 0}%
+                <span className="text-xs font-normal text-gray-400 ml-1.5">done</span>
+              </p>
+              {weekReport?.on_track_status === "on_track" && (
+                <span className="text-[11px] bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full">
+                  On track ✓
+                </span>
+              )}
+              {weekReport?.on_track_status === "at_risk" && (
+                <span className="text-[11px] bg-yellow-50 dark:bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 px-2 py-0.5 rounded-full">
+                  At risk ⚠
+                </span>
+              )}
+              {weekReport?.on_track_status === "behind" && (
+                <span className="text-[11px] bg-red-50 dark:bg-red-500/10 text-red-500 dark:text-red-400 px-2 py-0.5 rounded-full">
+                  Behind ✗
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-gray-400 mt-0.5">
+              Weekly focus overview
+            </p>
+          </div>
         </div>
       </div>
 
@@ -283,27 +303,40 @@ export default function DashboardOverview() {
 
       <div className="pt-4">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
-            📅 Today's Schedule
+          <h2 className="text-base font-semibold text-gray-800 dark:text-white">
+            Today's Schedule
           </h2>
-          <Link
-            href="/dashboard/schedule"
-            className="text-xs text-accent font-bold hover:underline"
+          <button suppressHydrationWarning
+            onClick={() => window.location.href = "/dashboard/schedule"}
+            className="text-xs text-violet-500 hover:text-violet-600 font-medium transition-colors"
           >
             View all →
-          </Link>
+          </button>
         </div>
 
         {tasks.length === 0 ? (
-          <div className="bg-surface border border-card-border border-dashed rounded-2xl p-10 flex flex-col items-center justify-center text-center">
-            <div className="w-12 h-12 bg-accent/10 text-accent rounded-full flex items-center justify-center mb-4">
-              <LayoutTemplate size={24} />
+          <div className="text-center py-12 bg-white dark:bg-[#111118] border border-dashed border-gray-200 dark:border-white/10 rounded-2xl shadow-sm">
+            <p className="text-3xl mb-3">📋</p>
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
+              No tasks scheduled today
+            </p>
+            <p className="text-xs text-gray-400 mt-1 mb-4">
+              Get started with a template
+            </p>
+            <div className="flex gap-2 justify-center flex-wrap">
+              <button suppressHydrationWarning
+                onClick={() => window.location.href = "/dashboard/templates"}
+                className="text-xs px-4 py-2 bg-violet-500 text-white rounded-lg hover:bg-violet-600 transition-colors"
+              >
+                Browse Templates
+              </button>
+              <button suppressHydrationWarning
+                onClick={() => window.location.href = "/dashboard/ai-assistant"}
+                className="text-xs px-4 py-2 border border-violet-200 dark:border-violet-500/30 text-violet-500 rounded-lg hover:bg-violet-50 dark:hover:bg-violet-500/10 transition-colors"
+              >
+                Ask AI
+              </button>
             </div>
-            <h3 className="text-lg font-bold mb-1">No tasks today</h3>
-            <p className="text-sm text-muted mb-6 max-w-xs">Ask Planora AI to build your schedule!</p>
-            <Link href="/dashboard/ai-assistant" className="text-xs font-black text-accent uppercase tracking-widest hover:underline flex items-center gap-2">
-              Talk to AI <ArrowRight size={12} />
-            </Link>
           </div>
         ) : (
           <div className="space-y-3">
@@ -350,10 +383,10 @@ function TaskTimelineItem({ id, time, task, category, completed = false, subtask
   const completedSubtasks = subtasks.filter((st: any) => st.completed).length;
 
   return (
-    <div className="glass-card rounded-xl border border-card-border transition-all hover:border-accent/30 overflow-hidden">
+    <div className="flex items-center gap-3 p-4 bg-white dark:bg-[#111118] border border-gray-100 dark:border-white/8 rounded-xl mb-2 shadow-sm hover:border-violet-200 dark:hover:border-violet-500/20 hover:shadow-md transition-all duration-150 group">
       <div
         onClick={onClick}
-        className="flex items-center gap-4 p-4 cursor-pointer"
+        className="flex items-center gap-4 cursor-pointer flex-1"
       >
         <div className="flex-shrink-0">
           <AnimatePresence mode="wait">
@@ -381,20 +414,20 @@ function TaskTimelineItem({ id, time, task, category, completed = false, subtask
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <p className={`text-sm font-bold truncate ${completed ? 'line-through text-muted' : 'text-foreground'}`}>
+            <p className={`text-sm font-bold truncate ${completed ? 'line-through text-muted' : 'text-gray-800 dark:text-white'}`}>
               {task}
             </p>
             {subtasks.length > 0 && (
-              <span className="text-[9px] font-black bg-secondary px-1.5 py-0.5 rounded text-muted uppercase tracking-tighter">
+              <span className="text-[9px] font-black bg-gray-100 dark:bg-white/5 px-1.5 py-0.5 rounded text-gray-500 dark:text-gray-400 uppercase tracking-tighter">
                 {completedSubtasks}/{subtasks.length}
               </span>
             )}
           </div>
           <div className="flex items-center gap-3 mt-1">
-            <span className="text-xs font-bold text-accent">
+            <span className="text-[10px] font-semibold bg-violet-50 dark:bg-violet-500/10 text-violet-500 px-2 py-0.5 rounded-md">
               {time}
             </span>
-            <span className="text-[10px] font-bold text-muted uppercase tracking-wider">
+            <span className="text-[10px] text-gray-400 bg-gray-50 dark:bg-white/5 px-2 py-0.5 rounded-md uppercase tracking-wide">
               {category}
             </span>
           </div>
@@ -432,7 +465,7 @@ function TaskTimelineItem({ id, time, task, category, completed = false, subtask
               e.stopPropagation();
               onToggleExpand();
             }}
-            className={`p-2 rounded-lg hover:bg-secondary transition-all ${isExpanded ? 'rotate-180 text-accent' : 'text-muted'}`}
+            className={`p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 transition-all ${isExpanded ? 'rotate-180 text-violet-500' : 'text-gray-400'}`}
           >
             <ChevronDown size={18} />
           </button>
