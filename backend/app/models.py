@@ -1,8 +1,9 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, func
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, func, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from .database import Base
 import uuid
+from datetime import datetime
 
 class User(Base):
     __tablename__ = "users"
@@ -155,3 +156,14 @@ class SubTask(Base):
     created_at = Column(DateTime, server_default=func.now())
 
     parent_task = relationship("DailyTask", back_populates="subtasks")
+
+class Note(Base):
+    __tablename__ = "notes"
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(String, index=True)
+    title = Column(String)
+    content = Column(Text)  # markdown format
+    tags = Column(String, nullable=True)  # comma separated
+    source = Column(String, nullable=True) # "manual" | "ai_generated" | "study_mode"
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

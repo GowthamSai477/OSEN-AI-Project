@@ -4,7 +4,7 @@ import { UserButton, useUser } from "@clerk/nextjs";
 import { useAuth } from "@clerk/nextjs";
 import {
   Calendar, LayoutDashboard, MessageSquareText, Settings, Sun, Moon,
-  Sparkles, Menu, X, Bell, Zap, AlertTriangle, Flame, CheckCircle2, Info, Trash2, BarChart2, Timer, LayoutTemplate
+  Sparkles, Menu, X, Bell, Zap, AlertTriangle, Flame, CheckCircle2, Info, Trash2, BarChart2, Timer, LayoutTemplate, FileText, BookOpen
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -161,6 +161,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { name: "AI Assistant",href: "/dashboard/ai-assistant",icon: MessageSquareText },
     { name: "Schedule",    href: "/dashboard/schedule",    icon: Calendar },
     { name: "Templates",   href: "/dashboard/templates",   icon: LayoutTemplate },
+    { name: "Notes",       href: "/dashboard/notes",       icon: FileText },
+    { name: "Study",       href: "/dashboard/study",       icon: BookOpen },
     { name: "Focus",       href: "/dashboard/focus",       icon: Timer },
     { name: "Progress",    href: "/dashboard/progress",    icon: BarChart2 },
     { name: "Settings",    href: "/dashboard/settings",    icon: Settings },

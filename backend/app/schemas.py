@@ -123,3 +123,47 @@ class UserPreferencesResponse(BaseModel):
     email_plan_changes_enabled: bool
     morning_email_time: str
     evening_email_time: str
+
+class NoteCreate(BaseModel):
+    title: str
+    content: str
+    tags: Optional[str] = None
+    source: str = "manual"
+
+class NoteUpdate(BaseModel):
+    title: Optional[str] = None
+    content: Optional[str] = None
+    tags: Optional[str] = None
+
+class NoteResponse(BaseModel):
+    id: str
+    title: str
+    content: str
+    tags: Optional[str] = None
+    source: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class NoteGenerateRequest(BaseModel):
+    topic: str
+    detail_level: str # "brief" | "detailed"
+
+class StudyAnalyzeRequest(BaseModel):
+    message: Optional[str] = None
+    file_content: str
+    file_name: str
+    action: str # "chat"|"summarize"|"key_concepts"|"create_notes"|"explain"
+
+class QuizGenerateRequest(BaseModel):
+    topic: str
+    file_content: Optional[str] = None
+    quiz_type: str # "descriptive"|"mcq"
+    difficulty: str # "easy"|"medium"|"hard"
+    num_questions: int
+
+class DescriptiveGradeRequest(BaseModel):
+    questions: List[Dict[str, Any]] # {question, model_answer, key_points}
+    answers: List[str]
