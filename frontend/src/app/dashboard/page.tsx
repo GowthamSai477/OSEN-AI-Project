@@ -510,6 +510,4 @@ function TaskTimelineItem({ id, time, task, category, completed = false, subtask
     </div>
   );
 }
-  );
-}
 
