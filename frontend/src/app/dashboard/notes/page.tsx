@@ -394,7 +394,7 @@ export default function NotesPage() {
       </div>
 
       {/* Editor/Viewer */}
-      <div className="flex-1 bg-white border border-card-border rounded-[2rem] overflow-hidden flex flex-col shadow-sm relative h-full">
+      <div className="flex-1 bg-white border border-card-border rounded-[2.5rem] shadow-sm relative flex flex-col h-full min-h-0 overflow-hidden">
         {selectedNote ? (
           <>
             <div className="p-8 border-b border-card-border/50 flex items-center justify-between gap-6 bg-secondary/5">
@@ -471,18 +471,18 @@ export default function NotesPage() {
               </div>
             </div>
 
-            <div className="flex-1 overflow-hidden flex flex-col p-10 bg-white">
+            <div className="flex-1 flex flex-col min-h-0 overflow-hidden bg-white">
               {isEditing ? (
                 <textarea 
                   suppressHydrationWarning
                   value={selectedNote.content}
                   onChange={(e) => setSelectedNote({ ...selectedNote, content: e.target.value })}
                   onBlur={() => handleUpdateNote({ content: selectedNote.content })}
-                  className="flex-1 w-full bg-transparent resize-none focus:outline-none font-mono text-sm leading-relaxed text-foreground/80 custom-scrollbar overflow-y-auto"
+                  className="w-full h-full flex-1 min-h-[300px] bg-transparent resize-none focus:outline-none font-mono text-[15px] leading-[1.7] text-foreground/80 p-8 custom-scrollbar overflow-y-auto border-none outline-none"
                   placeholder="# Start documenting your thoughts...&#10;&#10;Use markdown to structure your content."
                 />
               ) : (
-                <div className="flex-1 overflow-y-auto custom-scrollbar prose dark:prose-invert max-w-none prose-violet prose-headings:font-black prose-headings:tracking-tight prose-p:leading-relaxed prose-table:border-collapse prose-th:border prose-th:p-2 prose-td:border prose-td:p-2">
+                <div className="flex-1 overflow-y-auto custom-scrollbar p-8 prose dark:prose-invert max-w-none prose-violet prose-headings:font-black prose-headings:tracking-tight prose-p:leading-relaxed prose-table:border-collapse prose-th:border prose-th:p-2 prose-td:border prose-td:p-2">
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>{selectedNote.content}</ReactMarkdown>
                 </div>
               )}

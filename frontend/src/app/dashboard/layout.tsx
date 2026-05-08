@@ -330,7 +330,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               
               {/* Gamification Tracker */}
               {gamification && (
-                <div className="flex items-center flex-nowrap whitespace-nowrap gap-3 px-4 py-2 bg-white border border-card-border rounded-2xl shadow-sm overflow-hidden max-w-[280px]">
+                <div className="flex items-center flex-nowrap whitespace-nowrap gap-3 px-4 py-2 bg-white border border-card-border rounded-2xl shadow-sm overflow-hidden max-w-[180px] shrink-0">
                   <div className="flex items-center gap-1.5 font-black text-sm text-amber-500 shrink-0">
                     <Flame size={16} className={gamification.current_streak > 0 ? "text-orange-500 fill-orange-500 animate-pulse" : "text-muted"} />
                     {gamification.current_streak}
