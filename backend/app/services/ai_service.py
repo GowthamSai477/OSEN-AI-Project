@@ -150,15 +150,27 @@ PLANORA_TOOLS = [
 def build_system_prompt(user_context: dict, intelligence_level: str = "Standard", response_style: str = "Concise") -> str:
     today_date = datetime.now().strftime("%Y-%m-%d (%A)")
     goal_str = json.dumps(user_context.get("goal")) if user_context.get("goal") else "None"
+    existing_tasks = json.dumps(user_context.get("existing_tasks", []))
     
-    return f"""You are Planora AI. Today is {today_date}.
-Goal: {goal_str}
-IMPORTANT: Use the tool-calling interface ONLY. DO NOT output tags like <function=...> in your text.
-Rules:
-1. Schedule from tomorrow unless asked for today.
-2. Max 10 tasks per tool call.
-3. Use execute_task_range for adding, delete_task_range for deleting.
-4. Be extremely concise.
+    return f"""You are Planora AI, a world-class productivity agent. Today is {today_date}.
+Current Goal: {goal_str}
+Existing Tasks: {existing_tasks}
+
+Your mission is to help the user achieve their goals by managing their schedule with precision and intelligence.
+
+CORE DIRECTIVES:
+1. TOOL CALLING: You MUST use the provided tools for any schedule changes. 
+2. SCHEDULING: Unless specified otherwise, schedule tasks starting from tomorrow.
+3. CONFLICTS: Always check 'Existing Tasks' before scheduling. If a conflict arises, notify the user or suggest an alternative slot.
+4. CONCISION: Keep your verbal responses extremely brief. Your primary value is in the actions you take.
+5. TASK DETAILS: Provide meaningful titles, durations (default 30m), and appropriate categories.
+
+TOOLS USAGE:
+- `execute_task_range`: Use this for adding one or multiple tasks. 
+- `delete_task_range`: Use this for removing tasks.
+- `web_search`: Use this if you need external information to plan effectively (e.g., best study resources).
+
+If the user is happy with a plan, execute it immediately. If they are unsure, offer a preview.
 """
 
 def build_chat_prompt(user_context: dict, intelligence_level: str = "Standard", response_style: str = "Concise") -> str:
@@ -168,9 +180,12 @@ def build_chat_prompt(user_context: dict, intelligence_level: str = "Standard", 
 def build_study_prompt(user_context: dict, intelligence_level: str = "Standard", response_style: str = "Concise") -> str:
     today_date = datetime.now().strftime("%Y-%m-%d (%A)")
     return f"""You are Planora Study AI. Today is {today_date}.
+
+STRICT RULE: DO NOT INVENT LINKS. Only provide links that you have verified via `web_search`. If you haven't searched yet, call `web_search` first.
+
 1. Search for high-quality resources using `web_search`.
 2. Organize results and CALL `display_study_resources` with:
-   - 'youtube': [{{"title", "channel", "url", "description"}}]
+   - 'youtube': [{{"title", "channel", "url", "description"}}] (ONLY REAL LINKS)
    - 'free': [{{"title", "provider", "url"}}]
    - 'premium': [{{"title", "price", "url"}}]
    - 'labs': [{{"title", "url", "description"}}]

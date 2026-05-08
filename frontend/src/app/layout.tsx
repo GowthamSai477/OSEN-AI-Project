@@ -51,6 +51,10 @@ export default function RootLayout({
       >
         <head>
           <Script id="theme-script" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: themeScript }} />
+          <Script 
+            src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" 
+            strategy="beforeInteractive" 
+          />
         </head>
         <body className="min-h-full flex flex-col font-sans selection:bg-accent/30 transition-colors duration-300 ease-in-out bg-background text-foreground">
           <ThemeProvider>

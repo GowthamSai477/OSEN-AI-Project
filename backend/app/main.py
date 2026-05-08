@@ -8,6 +8,9 @@ from sqlalchemy.orm import Session
 from contextlib import asynccontextmanager
 from .services.scheduler_service import start_scheduler, stop_scheduler
 
+from .models import Base
+from .database import engine
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
@@ -68,7 +71,7 @@ async def global_exception_handler(request, exc):
         }
     )
 
-from .routers import ai, goals, planner, analytics, users, export, notifications, progress, subtasks, notes, export_notes, study
+from .routers import ai, goals, planner, analytics, users, export, notifications, progress, subtasks, notes, export_notes, study, health, gamification
 
 app.include_router(ai.router)
 app.include_router(goals.router)
@@ -80,6 +83,8 @@ app.include_router(notifications.router)
 app.include_router(progress.router)
 app.include_router(subtasks.router, prefix="/api/subtasks", tags=["subtasks"])
 app.include_router(notes.router)
+app.include_router(health.router)
+app.include_router(gamification.router)
 app.include_router(export_notes.router)
 app.include_router(study.router)
 

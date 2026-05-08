@@ -167,3 +167,42 @@ class Note(Base):
     source = Column(String, nullable=True) # "manual" | "ai_generated" | "study_mode"
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class UserHealthProfile(Base):
+    __tablename__ = "user_health_profiles"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), unique=True, index=True)
+    height_cm = Column(Integer, nullable=True)
+    weight_kg = Column(Integer, nullable=True)
+    daily_water_goal = Column(Integer, default=8)
+    daily_step_goal = Column(Integer, default=10000)
+    track_menstrual_cycle = Column(Boolean, default=False)
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
+
+class DailyHealthLog(Base):
+    __tablename__ = "daily_health_logs"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    date = Column(DateTime, nullable=False, index=True) # Midnight timestamp of the logged day
+    water_glasses = Column(Integer, default=0)
+    sleep_hours = Column(Integer, default=0) # using int or float, let's use Float
+    calories_consumed = Column(Integer, default=0)
+    mood = Column(String, nullable=True) # e.g. happy, sad, neutral
+    steps = Column(Integer, default=0)
+    period_active = Column(Boolean, default=False)
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
+
+class GamificationProfile(Base):
+    __tablename__ = "gamification_profiles"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), unique=True, index=True)
+    xp = Column(Integer, default=0)
+    level = Column(Integer, default=1)
+    current_streak = Column(Integer, default=0)
+    longest_streak = Column(Integer, default=0)
+    last_active_date = Column(DateTime, nullable=True)
+    badges = Column(JSONB, default=list) # e.g. ["7-day-streak", "1000-xp"]
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())

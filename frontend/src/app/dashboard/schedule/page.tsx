@@ -131,6 +131,16 @@ export default function SchedulePage() {
         },
         body: JSON.stringify({ completed: !currentStatus })
       });
+      
+      // Award Gamification XP
+      if (!currentStatus) {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gamification/add-xp`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ amount: 10, reason: "task_completion_schedule" })
+        }).catch(err => console.error("Failed to award XP:", err));
+      }
+      
       invalidateTasks();
     } catch (e) {
       console.error(e);
@@ -163,6 +173,13 @@ export default function SchedulePage() {
         const data = await res.json();
         if (data.task_completed) {
           setConfettiTrigger(prev => prev + 1);
+          
+          // Award XP since the whole task was completed
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gamification/add-xp`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ amount: 10, reason: "task_completion_subtasks" })
+          }).catch(err => console.error("Failed to award XP:", err));
         }
         invalidateTasks();
       }

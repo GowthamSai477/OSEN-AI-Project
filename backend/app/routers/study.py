@@ -21,16 +21,19 @@ async def analyze_document(
 Analyze the provided document and help the student.
 Be educational, clear, and structured."""
 
+    # Prevent Quota Exceeded errors by truncating large PDFs to ~50k chars (approx 12k tokens)
+    safe_content = req.file_content[:50000] if req.file_content else ""
+
     if req.action == "summarize":
-        user_msg = f"Summarize this document:\n{req.file_content}"
+        user_msg = f"Summarize this document:\n{safe_content}"
     elif req.action == "key_concepts":
-        user_msg = f"List all key concepts from:\n{req.file_content}"
+        user_msg = f"List all key concepts from:\n{safe_content}"
     elif req.action == "create_notes":
-        user_msg = f"Create structured study notes in markdown from:\n{req.file_content}"
+        user_msg = f"Create structured study notes in markdown from:\n{safe_content}"
     elif req.action == "explain":
-        user_msg = f"Explain this document simply:\n{req.file_content}"
+        user_msg = f"Explain this document simply:\n{safe_content}"
     else:
-        user_msg = f"Document:\n{req.file_content}\n\nQuestion: {req.message}"
+        user_msg = f"Document:\n{safe_content}\n\nQuestion: {req.message}"
 
     messages = [
         {"role": "system", "content": system_prompt},
@@ -38,7 +41,8 @@ Be educational, clear, and structured."""
     ]
 
     try:
-        response = await ai_service.chat(messages, max_tokens=1500)
+        # Switch to Gemini for document analysis
+        response = await ai_service.chat(messages, max_tokens=3000, provider="gemini")
         content = response["content"]
 
         note_created = False
@@ -66,6 +70,9 @@ Be educational, clear, and structured."""
             "note_id": note_id
         }
     except Exception as e:
+        import traceback
+        print("STUDY ANALYZE ERROR:")
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/generate-quiz")
@@ -76,11 +83,19 @@ async def generate_quiz(
 ):
     topic_context = f"about {req.topic}"
     if req.file_content:
-        topic_context = f"based on this document content: {req.file_content[:2000]}..."
+        # Increase context window significantly for Gemini
+        topic_context = f"based on this document content:\n\n{req.file_content[:50000]}\n\n"
 
     if req.quiz_type == "mcq":
-        prompt = f"""Generate {req.num_questions} {req.difficulty} MCQ questions {topic_context}.
-Return ONLY valid JSON:
+        prompt = f"""
+        You are a senior academic examiner. Generate {req.num_questions} high-quality MCQ questions for a {req.difficulty} level quiz {topic_context}.
+        
+        CRITICAL DIFFICULTY RULES:
+        - EASY: Focus on basic facts, definitions, and direct recall.
+        - MEDIUM: Focus on application of concepts, explaining relationships, and intermediate understanding.
+        - HARD: Focus on deep critical analysis, complex problem solving, nuanced exceptions, and synthesizing multiple parts of the content. Questions must be challenging and require significant cognitive effort.
+        
+        Return ONLY valid JSON:
 {{
   "questions": [
     {{
@@ -92,8 +107,15 @@ Return ONLY valid JSON:
   ]
 }}"""
     else:
-        prompt = f"""Generate {req.num_questions} {req.difficulty} descriptive questions {topic_context}.
-Return ONLY valid JSON:
+        prompt = f"""
+        You are a senior academic examiner. Generate {req.num_questions} challenging descriptive questions for a {req.difficulty} level quiz {topic_context}.
+        
+        CRITICAL DIFFICULTY RULES:
+        - EASY: Define or describe basic concepts.
+        - MEDIUM: Compare and contrast, explain processes, or apply concepts to standard scenarios.
+        - HARD: Evaluate complex scenarios, synthesize theoretical information, or critique advanced arguments. Requires deep analytical thinking.
+        
+        Return ONLY valid JSON:
 {{
   "questions": [
     {{
@@ -110,7 +132,8 @@ Return ONLY valid JSON:
     ]
 
     try:
-        response = await ai_service.chat(messages, max_tokens=2000)
+        # Switch to Gemini for quiz generation
+        response = await ai_service.chat(messages, max_tokens=4000, provider="gemini")
         # Try to parse JSON from content
         content = response["content"]
         # Clean potential markdown code blocks
@@ -149,7 +172,8 @@ Return ONLY valid JSON: {{"score": 7, "feedback": "...", "missed_points": ["..."
         ]
         
         try:
-            response = await ai_service.chat(messages, max_tokens=500)
+            # Switch to Gemini for grading
+            response = await ai_service.chat(messages, max_tokens=1000, provider="gemini")
             content = response["content"]
             if "```json" in content:
                 content = content.split("```json")[1].split("```")[0].strip()

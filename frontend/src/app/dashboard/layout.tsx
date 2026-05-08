@@ -4,7 +4,7 @@ import { UserButton, useUser } from "@clerk/nextjs";
 import { useAuth } from "@clerk/nextjs";
 import {
   Calendar, LayoutDashboard, MessageSquareText, Settings, Sun, Moon,
-  Sparkles, Menu, X, Bell, Zap, AlertTriangle, Flame, CheckCircle2, Info, Trash2, BarChart2, Timer, LayoutTemplate, FileText, BookOpen
+  Sparkles, Menu, X, Bell, Zap, AlertTriangle, Flame, CheckCircle2, Info, Trash2, BarChart2, Timer, LayoutTemplate, FileText, BookOpen, Activity, Award
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -20,6 +20,12 @@ type Notification = {
   read: boolean;
   link: string | null;
   created_at: string;
+};
+
+type GamificationStatus = {
+  xp: number;
+  level: number;
+  current_streak: number;
 };
 
 function timeAgo(dateStr: string): string {
@@ -56,6 +62,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [bellOpen, setBellOpen] = useState(false);
   const bellRef = useRef<HTMLDivElement>(null);
+
+  // Gamification state
+  const [gamification, setGamification] = useState<GamificationStatus | null>(null);
 
   useEffect(() => {
     const savedState = localStorage.getItem("planora_sidebar_collapsed");
@@ -96,6 +105,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const interval = setInterval(fetchNotifications, 60000);
     return () => clearInterval(interval);
   }, [fetchNotifications]);
+
+  const fetchGamification = useCallback(async () => {
+    if (!user) return;
+    try {
+      const token = await getToken();
+      if (!token) return;
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gamification/status`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) setGamification(await res.json());
+    } catch (e) {}
+  }, [getToken, user]);
+
+  useEffect(() => {
+    fetchGamification();
+  }, [fetchGamification, pathname]); // Re-fetch on navigation
 
   // Close bell on outside click
   useEffect(() => {
@@ -163,6 +188,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { name: "Templates",   href: "/dashboard/templates",   icon: LayoutTemplate },
     { name: "Notes",       href: "/dashboard/notes",       icon: FileText },
     { name: "Study",       href: "/dashboard/study",       icon: BookOpen },
+    { name: "Games",       href: "/dashboard/games",       icon: Award },
+    { name: "Health",      href: "/dashboard/health",      icon: Activity },
     { name: "Focus",       href: "/dashboard/focus",       icon: Timer },
     { name: "Progress",    href: "/dashboard/progress",    icon: BarChart2 },
     { name: "Settings",    href: "/dashboard/settings",    icon: Settings },
@@ -298,13 +325,36 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </div>
             )}
 
-            {/* Desktop Bell (top-right of main area) */}
-            <div className="hidden md:flex justify-end mb-0 absolute top-6 right-8 z-30" ref={pathname.includes("ai-assistant") ? undefined : bellRef}>
+            {/* Desktop Gamification & Bell (top-right of main area) */}
+            <div className="hidden md:flex justify-end items-center mb-6 z-30 gap-4 relative" ref={pathname.includes("ai-assistant") ? undefined : bellRef}>
+              
+              {/* Gamification Tracker */}
+              {gamification && (
+                <div className="flex items-center flex-nowrap whitespace-nowrap gap-3 px-4 py-2 bg-white border border-card-border rounded-2xl shadow-sm overflow-hidden max-w-[280px]">
+                  <div className="flex items-center gap-1.5 font-black text-sm text-amber-500 shrink-0">
+                    <Flame size={16} className={gamification.current_streak > 0 ? "text-orange-500 fill-orange-500 animate-pulse" : "text-muted"} />
+                    {gamification.current_streak}
+                  </div>
+                  <div className="w-px h-4 bg-card-border/50 shrink-0" />
+                  <div className="flex items-center gap-1.5 font-black text-sm text-accent shrink-0">
+                    <Award size={16} />
+                    Lvl {gamification.level}
+                  </div>
+                  <div className="w-20 lg:w-24 h-1.5 bg-secondary rounded-full overflow-hidden ml-1 shrink-0 relative">
+                    <div 
+                      className="h-full bg-accent shadow-[0_0_8px_var(--color-accent-glow)] absolute left-0 top-0 transition-all duration-500" 
+                      style={{width: `${Math.min(100, (gamification.xp % 50) / 50 * 100)}%`}}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Bell Icon */}
               <div ref={!pathname.includes("ai-assistant") ? undefined : bellRef} className="relative">
-                <button suppressHydrationWarning onClick={() => setBellOpen(prev => !prev)} className="relative p-2 rounded-xl bg-secondary/60 hover:bg-secondary text-muted hover:text-foreground transition-colors border border-card-border">
-                  <Bell size={18} />
+                <button suppressHydrationWarning onClick={() => setBellOpen(prev => !prev)} className="relative p-2.5 rounded-xl bg-white hover:bg-secondary/30 text-muted hover:text-accent transition-all border border-card-border shadow-sm">
+                  <Bell size={20} />
                   {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 leading-none">
+                    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 leading-none shadow-sm">
                       {unreadCount > 9 ? "9+" : unreadCount}
                     </span>
                   )}

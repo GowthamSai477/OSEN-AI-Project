@@ -78,10 +78,10 @@ class TaskResponse(BaseModel):
     date: datetime
     time: str
     duration_minutes: int
-    category: str
-    task_type: str
-    status: str
-    priority: str
+    category: Optional[str] = "Task"
+    task_type: Optional[str] = "task"
+    status: Optional[str] = "pending"
+    priority: Optional[str] = "medium"
     completed: bool
     url: Optional[str] = None
     links: Optional[List[Dict[str, Any]]] = None
@@ -150,6 +150,7 @@ class NoteResponse(BaseModel):
 class NoteGenerateRequest(BaseModel):
     topic: str
     detail_level: str # "brief" | "detailed"
+    file_content: Optional[str] = None
 
 class StudyAnalyzeRequest(BaseModel):
     message: Optional[str] = None
@@ -164,6 +165,67 @@ class QuizGenerateRequest(BaseModel):
     difficulty: str # "easy"|"medium"|"hard"
     num_questions: int
 
+class GenerateFlashcardsRequest(BaseModel):
+    topic: str
+    file_content: Optional[str] = None
+    num_cards: int = 10
+
 class DescriptiveGradeRequest(BaseModel):
     questions: List[Dict[str, Any]] # {question, model_answer, key_points}
     answers: List[str]
+
+# Health Center Schemas
+class UserHealthProfileUpdate(BaseModel):
+    height_cm: Optional[int] = None
+    weight_kg: Optional[int] = None
+    daily_water_goal: Optional[int] = None
+    daily_step_goal: Optional[int] = None
+    track_menstrual_cycle: Optional[bool] = None
+
+class UserHealthProfileResponse(BaseModel):
+    height_cm: Optional[int]
+    weight_kg: Optional[int]
+    daily_water_goal: int
+    daily_step_goal: int
+    track_menstrual_cycle: bool
+
+    class Config:
+        from_attributes = True
+
+class DailyHealthLogUpdate(BaseModel):
+    water_glasses: Optional[int] = None
+    sleep_hours: Optional[float] = None
+    calories_consumed: Optional[int] = None
+    mood: Optional[str] = None
+    steps: Optional[int] = None
+    period_active: Optional[bool] = None
+
+class DailyHealthLogResponse(BaseModel):
+    date: datetime
+    water_glasses: int
+    sleep_hours: float
+    calories_consumed: int
+    mood: Optional[str]
+    steps: int
+    period_active: bool
+
+    class Config:
+        from_attributes = True
+
+class CalorieEstimateRequest(BaseModel):
+    meal_description: str
+
+# Gamification Schemas
+class GamificationStatusResponse(BaseModel):
+    xp: int
+    level: int
+    current_streak: int
+    longest_streak: int
+    badges: List[str]
+
+    class Config:
+        from_attributes = True
+
+class AddXpRequest(BaseModel):
+    amount: int
+    reason: str

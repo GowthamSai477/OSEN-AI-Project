@@ -58,18 +58,29 @@ export default function DashboardOverview() {
       }
       const userId = user.id;
 
-      const [tasksData, statsData, reportData] = await Promise.all([
-        cachedFetch<any[]>(`tasks_${userId}`, `${base}/api/planner/tasks`, token, 60000, force),
-        cachedFetch<any>(`goal_stats_${userId}`, `${base}/api/goals/stats`, token, 120000, force),
-        cachedFetch<any>(`week_report_${userId}`, `${base}/api/progress/weekly`, token, 600000, force),
-      ]);
+      // Individual fetches to prevent one failure from crashing the whole dashboard
+      let tasksData: any[] = [];
+      let statsData: any = null;
+      let reportData: any = null;
+
+      try {
+        tasksData = await cachedFetch<any[]>(`tasks_${userId}`, `${base}/api/planner/tasks`, token, 60000, force) || [];
+      } catch (e) { console.error("Tasks fetch failed", e); }
+
+      try {
+        statsData = await cachedFetch<any>(`goal_stats_${userId}`, `${base}/api/goals/stats`, token, 120000, force);
+      } catch (e) { console.error("Stats fetch failed", e); }
+
+      try {
+        reportData = await cachedFetch<any>(`week_report_${userId}`, `${base}/api/progress/weekly`, token, 600000, force);
+      } catch (e) { console.error("Weekly report fetch failed", e); }
 
       if (tasksData) {
         const todayStr = new Date().toLocaleDateString("en-CA");
         setTasks(
           tasksData
-            .filter((t: any) => t.date.startsWith(todayStr))
-            .sort((a: any, b: any) => a.time.localeCompare(b.time))
+            .filter((t: any) => t.date && t.date.startsWith(todayStr))
+            .sort((a: any, b: any) => (a.time || "").localeCompare(b.time || ""))
         );
       }
       if (statsData) setGoalStats(statsData);
@@ -102,6 +113,16 @@ export default function DashboardOverview() {
         },
         body: JSON.stringify({ completed: !currentStatus })
       });
+      
+      // Award XP for Gamification
+      if (!currentStatus) {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gamification/add-xp`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ amount: 10, reason: "task_completion" })
+        }).catch(err => console.error("Failed to award XP:", err));
+      }
+
       invalidateTasks();
     } catch (e) {
       console.error(e);
@@ -135,6 +156,13 @@ export default function DashboardOverview() {
         const data = await res.json();
         if (data.task_completed) {
           setConfettiTrigger(prev => prev + 1);
+          
+          // Award XP since the whole task was completed
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gamification/add-xp`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ amount: 10, reason: "task_completion_subtasks" })
+          }).catch(err => console.error("Failed to award XP:", err));
         }
         invalidateTasks();
       }
